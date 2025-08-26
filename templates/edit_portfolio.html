@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edit Portfolio{% endblock %}
+
+{% block content %}
+<nav style="padding: 10px; margin-bottom: 20px;">
+    <a href="{{ url_for('index') }}" class="filter-btn btn">&larr; Back to Home</a>
+</nav>
+
+<div class="upload-section card-3d">
+    <h2>Edit Your Portfolio</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="studentName">Student Name:</label>
+            <input type="text" id="studentName" name="student_name" value="{{ portfolio['student_name'] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="studentId">Student ID:</label>
+            <input type="text" id="studentId" name="student_id" value="{{ portfolio['student_id'] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{ portfolio['email'] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="portfolioTitle">Portfolio Title:</label>
+            <input type="text" id="portfolioTitle" name="portfolio_title" value="{{ portfolio['portfolio_title'] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Portfolio Description:</label>
+            <textarea id="description" name="description" rows="4">{{ portfolio['description'] }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" name="category" required>
+                {% set categories = ["web-development", "graphic-design", "data-science", "mobile-app", "photography", "other"] %}
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == portfolio['category'] %}selected{% endif %}>{{ cat.replace('-', ' ')|title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="projectUrl">Project URL:</label>
+            <input type="url" id="projectUrl" name="project_url" value="{{ portfolio['project_url'] }}" placeholder="https://...">
+        </div>
+        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 25px;">Note: File uploads cannot be edited. To change files, please delete and re-upload the portfolio.</div>
+        <button type="submit" class="submit-btn btn">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

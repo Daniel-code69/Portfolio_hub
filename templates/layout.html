@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Student Portfolio Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="https://www.google.com/s2/favicons?domain=google.com" type="image/x-icon">
+</head>
+<body data-user-id="{{ g.user['id'] if g.user else '' }}">
+    <div class="animated-bg"></div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="message-container" style="position: relative; top: 0; right: 0; margin-bottom: 20px;">
+              {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="messageContainer" class="message-container" aria-live="polite"></div>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

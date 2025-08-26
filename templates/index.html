@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portfolio Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="https://www.google.com/s2/favicons?domain=google.com" type="image/x-icon">
+</head>
+<body data-user-id="{{ g.user['id'] if g.user else '' }}">
+    <div class="animated-bg"></div>
+    <div class="container">
+        <nav style="text-align: right; padding: 10px; margin-bottom: 20px;">
+            {% if g.user %}
+                <span style="margin-right: 15px;">Welcome, {{ g.user['username'] }}!</span>
+                <a href="{{ url_for('logout') }}" class="filter-btn btn">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="filter-btn btn">Login</a>
+                <a href="{{ url_for('register') }}" class="filter-btn btn">Register</a>
+            {% endif %}
+        </nav>
+        <header>
+            <div class="header-content">
+                <h1 class="glitch" data-text="Student Portfolio Hub">Student Portfolio Hub</h1>
+                <p class="subtitle">Showcase Your Creative Journey • Upload • Inspire • Connect</p>
+                <ul class="stats-preview">
+                    <li class="stat-item card-3d"><div class="stat-number">150+</div><div class="stat-label">Portfolios</div></li>
+                    <li class="stat-item card-3d"><div class="stat-number">6</div><div class="stat-label">Categories</div></li>
+                    <li class="stat-item card-3d"><div class="stat-number">24/7</div><div class="stat-label">Access</div></li>
+                </ul>
+            </div>
+        </header>
+        <main>
+            {% if g.user %}
+                <section class="upload-section card-3d">
+                    <h2>Upload Your Portfolio</h2>
+                    <form id="portfolioForm" novalidate>
+                        <div class="form-group"><label for="studentName">Student Name:</label><input type="text" id="studentName" name="student_name" value="{{ g.user['username'] }}" required></div>
+                        <div class="form-group"><label for="studentId">Student ID:</label><input type="text" id="studentId" name="student_id" required></div>
+                        <div class="form-group"><label for="email">Email:</label><input type="email" id="email" name="email" required></div>
+                        <div class="form-group"><label for="portfolioTitle">Portfolio Title:</label><input type="text" id="portfolioTitle" name="portfolio_title" required></div>
+                        <div class="form-group"><label for="description">Portfolio Description:</label><textarea id="description" name="description" rows="4" placeholder="Describe your portfolio..."></textarea></div>
+                        <div class="form-group"><label for="category">Category:</label><select id="category" name="category" required><option value="">Select Category</option><option value="web-development">Web Development</option><option value="graphic-design">Graphic Design</option><option value="data-science">Data Science</option><option value="mobile-app">Mobile App</option><option value="photography">Photography</option><option value="other">Other</option></select></div>
+                        <div class="form-group"><label for="files">Upload Files:</label><input type="file" id="files" name="files" multiple><div id="fileListPreview" class="file-list-preview"></div><small>Images, Documents, Code, etc.</small></div>
+                        <div class="form-group"><label for="projectUrl">Project URL (if applicable):</label><input type="url" id="projectUrl" name="project_url" placeholder="https://..."></div>
+                        <button type="submit" class="submit-btn btn">Upload Portfolio</button>
+                    </form>
+                </section>
+            {% else %}
+                <div class="upload-section card-3d" style="text-align: center;">
+                    <h3><a href="{{ url_for('login') }}" style="color: var(--primary-accent);">Login</a> or <a href="{{ url_for('register') }}" style="color: var(--primary-accent);">Register</a> to upload your portfolio!</h3>
+                </div>
+            {% endif %}
+            <section class="gallery-section">
+                 <h2>Student Portfolios</h2>
+                <form id="searchForm" class="search-form">
+                    <input type="search" id="searchInput" name="query" placeholder="Search by title, name, or description...">
+                    <button type="submit" class="btn" aria-label="Search"></button>
+                </form>
+                <div class="filter-controls">
+                    <button class="filter-btn btn active" data-filter="all">All</button>
+                    <button class="filter-btn btn" data-filter="web-development">Web Dev</button>
+                    <button class="filter-btn btn" data-filter="graphic-design">Design</button>
+                    <button class="filter-btn btn" data-filter="data-science">Data Science</button>
+                    <button class="filter-btn btn" data-filter="mobile-app">Mobile</button>
+                    <button class="filter-btn btn" data-filter="photography">Photo</button>
+                    <button class="filter-btn btn" data-filter="other">Other</button>
+                </div>
+                <div id="portfolioGrid" class="portfolio-grid"></div>
+            </section>
+        </main>
+        <footer class="card-3d">
+            <p>&copy; 2025 Student Portfolio Platform. All rights reserved.</p>
+        </footer>
+    </div>
+    <div id="messageContainer" class="message-container" aria-live="polite"></div>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

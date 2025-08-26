@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ user['username'] }}'s Profile{% endblock %}
+
+{% block content %}
+<nav style="padding: 10px; margin-bottom: 20px;">
+    <a href="{{ url_for('index') }}" class="filter-btn btn">&larr; Back to Main Gallery</a>
+</nav>
+
+<div class="profile-header" style="text-align: center; margin-bottom: 50px;">
+    <h1 style="font-size: 3rem;">{{ user['username'] }}'s Portfolios</h1>
+    </div>
+
+<div id="portfolioGrid" class="portfolio-grid">
+    {% if portfolios %}
+        {% for portfolio in portfolios %}
+            <div class="portfolio-item card-3d" data-id="{{ portfolio.id }}" data-category="{{ portfolio.category }}">
+                <h3>{{ portfolio['portfolio_title'] }}</h3>
+                <p class="description">{{ portfolio['description'] or 'No description provided.' }}</p>
+                <div class="portfolio-meta">
+                    <span class="category">{{ portfolio['category'] }}</span>
+                    <span class="upload-date">{{ portfolio['upload_date'].strftime('%b %d, %Y') }}</span>
+                </div>
+                <div class="card-actions">
+                    {% if portfolio['project_url'] %}
+                        <a href="{{ portfolio['project_url'] }}" target="_blank" rel="noopener noreferrer" class="project-link">View Live Project</a>
+                    {% endif %}
+                    <div class="file-list">
+                        </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-gallery-message">{{ user['username'] }} hasn't uploaded any portfolios yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
