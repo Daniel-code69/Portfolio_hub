@@ -11,7 +11,7 @@
     <h2>Edit Your Portfolio</h2>
     <form method="post">
         <div class="form-group">
-            <label for="studentName">Student Name:</label>
+            <label for="studentName">Full Name:</label>
             <input type="text" id="studentName" name="student_name" value="{{ portfolio['student_name'] }}" required>
         </div>
         <div class="form-group">
@@ -27,8 +27,20 @@
             <input type="text" id="portfolioTitle" name="portfolio_title" value="{{ portfolio['portfolio_title'] }}" required>
         </div>
         <div class="form-group">
-            <label for="description">Portfolio Description:</label>
+            <label for="description">About Me (Bio):</label>
             <textarea id="description" name="description" rows="4">{{ portfolio['description'] }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="project_description">Project Description:</label>
+            <textarea id="project_description" name="project_description" rows="5">{{ portfolio['project_description'] }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="skills">Skills:</label>
+            <textarea id="skills" name="skills" rows="3">{{ portfolio['skills'] }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="projects">Featured Projects/Experience:</label>
+            <textarea id="projects" name="projects" rows="5">{{ portfolio['projects'] }}</textarea>
         </div>
         <div class="form-group">
             <label for="category">Category:</label>
@@ -43,7 +55,7 @@
             <label for="projectUrl">Project URL:</label>
             <input type="url" id="projectUrl" name="project_url" value="{{ portfolio['project_url'] }}" placeholder="https://...">
         </div>
-        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 25px;">Note: File uploads cannot be edited. To change files, please delete and re-upload the portfolio.</div>
+        <div style="font-size: 0.9em; color: var(--color-text-secondary); margin-bottom: 25px;">Note: File uploads cannot be edited. To change files, please delete and re-upload the portfolio.</div>
         <button type="submit" class="submit-btn btn">Save Changes</button>
     </form>
 </div>

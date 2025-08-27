@@ -33,19 +33,12 @@ def close_db_connection(exception=None):
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
-    # Added 'role' column to users table
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'user'
-        );
-    ''')
+    cur.execute('CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL, role TEXT NOT NULL DEFAULT \'user\');')
     cur.execute('''
         CREATE TABLE IF NOT EXISTS portfolios (
             id SERIAL PRIMARY KEY, student_name TEXT NOT NULL, student_id TEXT NOT NULL,
-            email TEXT NOT NULL, portfolio_title TEXT NOT NULL, description TEXT, category TEXT NOT NULL,
+            email TEXT NOT NULL, portfolio_title TEXT NOT NULL, description TEXT, 
+            skills TEXT, projects TEXT, project_description TEXT, category TEXT NOT NULL,
             project_url TEXT, upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
         );
@@ -85,6 +78,14 @@ def login_required(view):
         return view(**kwargs)
     return wrapped_view
 
+def admin_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None or g.user['role'] != 'admin':
+            abort(403)
+        return view(**kwargs)
+    return wrapped_view
+
 # --- ROUTE DEFINITIONS ---
 @app.route('/')
 def index():
@@ -113,6 +114,7 @@ def register():
         cur.close()
     return render_template('register.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -139,10 +141,21 @@ def logout():
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload_portfolio():
-    data = {k: request.form[k] for k in ['student_name', 'student_id', 'email', 'portfolio_title', 'description', 'category', 'project_url']}
+    data = {
+        'student_name': request.form['student_name'],
+        'student_id': request.form['student_id'],
+        'email': request.form['email'],
+        'portfolio_title': request.form['portfolio_title'],
+        'description': request.form['description'],
+        'skills': request.form['skills'],
+        'projects': request.form['projects'],
+        'project_description': request.form['project_description'],
+        'category': request.form['category'],
+        'project_url': request.form['project_url']
+    }
     conn, cur = get_db_connection(), get_db_connection().cursor()
     cur.execute(
-        'INSERT INTO portfolios (user_id, student_name, student_id, email, portfolio_title, description, category, project_url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id',
+        'INSERT INTO portfolios (user_id, student_name, student_id, email, portfolio_title, description, skills, projects, project_description, category, project_url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id',
         (g.user['id'], *data.values())
     )
     portfolio_id = cur.fetchone()[0]
@@ -217,9 +230,20 @@ def edit_portfolio(id):
     if portfolio is None: abort(404)
     if portfolio['user_id'] != g.user['id']: abort(403)
     if request.method == 'POST':
-        data = {k: request.form[k] for k in ['student_name', 'student_id', 'email', 'portfolio_title', 'description', 'category', 'project_url']}
+        data = {
+            'student_name': request.form['student_name'],
+            'student_id': request.form['student_id'],
+            'email': request.form['email'],
+            'portfolio_title': request.form['portfolio_title'],
+            'description': request.form['description'],
+            'skills': request.form['skills'],
+            'projects': request.form['projects'],
+            'project_description': request.form['project_description'],
+            'category': request.form['category'],
+            'project_url': request.form['project_url']
+        }
         cur.execute(
-            'UPDATE portfolios SET student_name=%s, student_id=%s, email=%s, portfolio_title=%s, description=%s, category=%s, project_url=%s WHERE id=%s',
+            'UPDATE portfolios SET student_name=%s, student_id=%s, email=%s, portfolio_title=%s, description=%s, skills=%s, projects=%s, project_description=%s, category=%s, project_url=%s WHERE id=%s',
             (*data.values(), id)
         )
         conn.commit()
@@ -233,6 +257,7 @@ def edit_portfolio(id):
 @login_required
 def delete_portfolio(id):
     conn = get_db_connection()
+    # THIS IS THE LINE THAT WAS FIXED
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * FROM portfolios WHERE id = %s AND user_id = %s', (id, g.user['id']))
     portfolio = cur.fetchone()
@@ -246,6 +271,7 @@ def delete_portfolio(id):
         return jsonify({'status': 'success', 'message': 'Portfolio deleted.'}), 200
     cur.close()
     return jsonify({'status': 'error', 'message': 'Portfolio not found or you do not have permission.'}), 403
+
 
 @app.route('/portfolio/<int:id>/like', methods=['POST'])
 @login_required
@@ -266,24 +292,11 @@ def like_portfolio(id):
     cur.close()
     return jsonify({'status': 'success', 'liked': liked, 'like_count': like_count})
 
-# --- NEW: TEMPORARY ADMIN PROMOTION ROUTE ---
-@app.route('/promote-to-admin')
+@app.route('/admin')
 @login_required
-def promote_to_admin():
-    # IMPORTANT: Change this to your actual username
-    ADMIN_USERNAME = "daniel" 
-
-    if g.user['username'] != ADMIN_USERNAME:
-        return "You are not authorized to perform this action.", 403
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("UPDATE users SET role = 'admin' WHERE username = %s", (ADMIN_USERNAME,))
-    conn.commit()
-    cur.close()
-    
-    flash(f"User '{ADMIN_USERNAME}' has been promoted to Admin!", "success")
-    return redirect(url_for('index'))
+@admin_required
+def admin_dashboard():
+    return "<h1>Welcome to the Admin Dashboard!</h1><p>We will build this page next.</p>"
 
 # --- MAIN EXECUTION ---
 if __name__ == '__main__':

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterButtons = document.querySelectorAll('.filter-btn');
     const fileInput = document.getElementById('files');
     const fileListPreview = document.getElementById('fileListPreview');
-    const searchForm = document.getElementById('searchForm'); // New selector
+    const searchForm = document.getElementById('searchForm');
 
     // --- UTILITY FUNCTIONS ---
     const sanitizeHTML = (str) => {
@@ -42,23 +42,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- PORTFOLIO RENDERING ---
     const createPortfolioItem = (portfolio) => {
         const item = document.createElement('div');
-        item.className = 'portfolio-item card-3d';
+        item.className = 'portfolio-item card-3d hidden';
         item.dataset.id = portfolio.id;
         item.dataset.category = portfolio.category;
+
+        const createSection = (title, content) => {
+            if (!content || content.trim() === '') return '';
+            return `
+                <div class="portfolio-section">
+                    <h4>${title}</h4>
+                    <p>${sanitizeHTML(content).replace(/\n/g, '<br>')}</p> 
+                </div>`;
+        };
+
         const fileLinks = (portfolio.files || []).map(file => `<a href="/download/${portfolio.id}/${encodeURIComponent(file)}" class="file-link">${sanitizeHTML(file)}</a>`).join('');
         const projectLink = portfolio.project_url ? `<a href="${encodeURI(portfolio.project_url)}" target="_blank" rel="noopener noreferrer" class="project-link">View Live Project</a>` : '';
+        
         let ownerActions = '';
         if (loggedInUserId && parseInt(loggedInUserId) === portfolio.user_id) {
             ownerActions = `<div class="owner-actions"><a href="/portfolio/${portfolio.id}/edit" class="btn-edit">Edit</a><button class="btn-delete" data-id="${portfolio.id}">Delete</button></div>`;
         }
+
         const studentNameHTML = `<a href="/profile/${sanitizeHTML(portfolio.owner_username)}" class="student-name-link">${sanitizeHTML(portfolio.owner_username)}</a>`;
         const likedClass = portfolio.is_liked ? 'liked' : '';
         const likeButtonHTML = `<div class="like-section"><button class="like-btn ${likedClass}" data-id="${portfolio.id}">👍</button><span class="like-count">${portfolio.like_count}</span></div>`;
-        item.innerHTML = `${ownerActions}<h3>${sanitizeHTML(portfolio.portfolio_title)}</h3><p class="student-name">By: ${studentNameHTML}</p><p class="description">${sanitizeHTML(portfolio.description || 'No description provided.')}</p><div class="portfolio-meta"><span class="category">${sanitizeHTML(portfolio.category)}</span><span class="upload-date">${new Date(portfolio.upload_date).toLocaleDateString()}</span></div><div class="card-actions"><div>${projectLink}<div class="file-list">${fileLinks}</div></div>${likeButtonHTML}</div>`;
+
+        item.innerHTML = `
+            ${ownerActions}
+            <h3>${sanitizeHTML(portfolio.portfolio_title)}</h3>
+            <p class="student-name">By: ${studentNameHTML}</p>
+            <hr class="card-divider">
+            
+            ${createSection('About Me', portfolio.description)}
+            ${createSection('Project Description', portfolio.project_description)}
+            ${createSection('Skills', portfolio.skills)}
+            ${createSection('Featured Projects', portfolio.projects)}
+            
+            <div class="portfolio-meta">
+                <span class="category">${sanitizeHTML(portfolio.category)}</span>
+                <span class="upload-date">${new Date(portfolio.upload_date).toLocaleDateString()}</span>
+            </div>
+            
+            <div class="card-actions">
+                <div>${projectLink}<div class="file-list">${fileLinks}</div></div>
+                ${likeButtonHTML}
+            </div>`;
         return item;
     };
 
     const loadPortfolios = async (searchQuery = '') => {
+        // ... (code remains the same)
         if (!portfolioGrid) return;
         toggleLoadingState(true);
         try {
@@ -73,8 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             portfolios.forEach((portfolio, index) => {
                 const item = createPortfolioItem(portfolio);
-                item.style.animationDelay = `${index * 0.1}s`;
                 portfolioGrid.appendChild(item);
+                setTimeout(() => {
+                    item.classList.remove('hidden');
+                }, 100 * index);
             });
         } catch (error) {
             toggleLoadingState(false);
@@ -85,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENT LISTENERS ---
     if (searchForm) {
+        // ... (code remains the same)
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const searchInput = document.getElementById('searchInput');
@@ -93,6 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (portfolioForm) {
+        // ... (code remains the same)
         portfolioForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = portfolioForm.querySelector('.submit-btn');
@@ -123,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if(portfolioGrid) {
+        // ... (code remains the same)
         portfolioGrid.addEventListener('click', async (e) => {
             if (e.target.classList.contains('btn-delete')) {
                 const portfolioId = e.target.dataset.id;
@@ -158,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if(filterButtons) {
+        // ... (code remains the same)
         filterButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 filterButtons.forEach(b => b.classList.remove('active'));
@@ -171,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (fileInput) {
+        // ... (code remains the same)
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) { fileListPreview.textContent = `${fileInput.files.length} file(s) selected`; } 
             else { fileListPreview.textContent = ''; }
